@@ -1,41 +1,169 @@
-Writing
-print("=== AI Study Assistant ===")
+# =======================================================
+# AI Study Assistant Pro (v2.0.0 - Google AI Edition)
+# Developed by: Suraj Indoliya (12th Grade Independent Research)
+# Custom Numeric Vector Search Math Engine + Google Gemini AI
+# =======================================================
 
-notes = []
+import math
+import os
+import google.generativeai as genai
 
-while True:
-    print("\n1. Add Note")
-    print("2. View Notes")
-    print("3. Ask AI")
-    print("4. Exit")
+# -------------------------------------------------------
+# GOOGLE GEMINI AI CONFIGURATION
+# -------------------------------------------------------
+# Apni Google AI Studio se mili API key yahan lagayein
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
 
-    choice = input("Enter choice: ")
+if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        # Lightweight aur fast model ka use kar rahe hain jo mobile par smoothly chale
+        ai_model = genai.GenerativeModel('gemini-1.5-flash')
+        GEMINI_AVAILABLE = True
+    except Exception:
+        GEMINI_AVAILABLE = False
+else:
+    GEMINI_AVAILABLE = False
 
-    if choice == "1":
-        note = input("Write your note: ")
-        notes.append(note)
-        print("Note saved!")
+# -------------------------------------------------------
+# CORE DATA PERSISTENCE & NOTES
+# -------------------------------------------------------
+study_notes = [
+    "Physics: Electric field is defined as the electric force per unit charge. The direction of the field is taken to be the direction of the force it would exert on a positive test charge.",
+    "Chemistry: Organic chemistry is the study of the structure, properties, composition, reactions, and preparation of carbon-containing compounds.",
+    "Mathematics: A Matrix is a rectangular array of numbers, symbols, or expressions, arranged in rows and columns. Matrices are widely used in computer graphics and machine learning vectors.",
+    "Python Programming: Functions are reusable blocks of code that perform a specific task. Python uses the def keyword to define a function."
+]
 
-    elif choice == "2":
-        print("\nYour Notes:")
-        for i, n in enumerate(notes, start=1):
-            print(f"{i}. {n}")
+# -------------------------------------------------------
+# BACKEND MATH ENGINE: PURE NUMERIC VECTORIZER (NO LIBRARIES)
+# -------------------------------------------------------
+def build_vocabulary(corpus):
+    vocab = set()
+    for document in corpus:
+        words = document.lower().replace(".", "").replace(":", "").split()
+        for word in words:
+            vocab.add(word)
+    return sorted(list(vocab))
 
-    elif choice == "3":
-        question = input("Ask something: ").lower()
+def text_to_vector(text, vocab):
+    vector = [0] * len(vocab)
+    words = text.lower().replace(".", "").replace(":", "").split()
+    for word in words:
+        if word in vocab:
+            vocab_index = vocab.index(word)
+            vector[vocab_index] += 1
+    return vector
 
-        if "python" in question:
-            print("Python is a powerful programming language.")
-        elif "ai" in question:
-            print("AI means Artificial Intelligence.")
-        elif "hello" in question:
-            print("Hello! How can I help you?")
-        else:
-            print("Sorry, I don't know that yet.")
+def calculate_cosine_similarity(vec1, vec2):
+    dot_product = 0
+    norm_a = 0
+    norm_b = 0
+    for i in range(len(vec1)):
+        dot_product += vec1[i] * vec2[i]
+        norm_a += vec1[i] ** 2
+        norm_b += vec2[i] ** 2
+    
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot_product / (math.sqrt(norm_a) * math.sqrt(norm_b))
 
-    elif choice == "4":
-        print("Goodbye!")
-        break
+# Global Vocabulary Build
+vocabulary = build_vocabulary(study_notes)
 
+# -------------------------------------------------------
+# GOOGLE AI INNOVATION LAYER (THE GOOGLE HACKATHON BRIDGE)
+# -------------------------------------------------------
+def ask_google_gemini_smart_summary(context_paragraph, user_query):
+    """
+    Yeh function hamare math engine ke result ko leta hai aur 
+    Google Gemini AI ko bhejkar ek super smart smart-study response generate karta hai.
+    """
+    if not GEMINI_AVAILABLE:
+        return "\n[⚠️ Google AI Info]: API Key missing or Google AI module offline. Displaying raw local vector match only."
+    
+    prompt = f"""
+    You are an AI Study Assistant Pro built by Suraj Indoliya for the Google AI Hackathon.
+    
+    Context from student's notes:
+    "{context_paragraph}"
+    
+    Student's Question:
+    "{user_query}"
+    
+    Instructions:
+    Based ONLY on the provided context, answer the student's question in a crisp, clear, and engaging educational format. 
+    Add a tiny 'Smart Quiz Question' at the end to help the student test their knowledge. Keep it concise.
+    """
+    try:
+        response = ai_model.generate_content(prompt)
+        return f"\n🤖 [Google Gemini AI Smart Insights]:\n{response.text}"
+    except Exception as e:
+        return f"\n[-] Failed to connect to Google AI Services: {str(e)}"
+
+# -------------------------------------------------------
+# MAIN CORE EXECUTION ENGINE
+# -------------------------------------------------------
+def main():
+    print("=========================================================")
+    print("   AI STUDY ASSISTANT PRO (v2.0.0 - GOOGLE AI EDITION)   ")
+    print("=========================================================")
+    print(f"[+] Status: Local Core Vector Engine Loaded. Vocab Size: {len(vocabulary)} words.")
+    if GEMINI_AVAILABLE:
+        print("[+] Status: Google Vertex/Gemini AI Gateway Online Integration Ready!")
     else:
-        print("Invalid choice.")
+        print("[!] Status: Google AI running in Standalone Local Verification Mode (No API Key).")
+    
+    while True:
+        print("\n---------------------------------------------------------")
+        print("1. Search Notes (Pure Math Engine + Google AI Analysis)")
+        print("2. View All Local Study Context Logs")
+        print("3. Exit System")
+        choice = input("Select Operation (1-3): ").strip()
+        
+        if choice == "1":
+            query = input("\nEnter your study question/keywords: ").strip()
+            if not query:
+                print("Query cannot be empty!")
+                continue
+                
+            query_vector = text_to_vector(query, vocabulary)
+            
+            best_similarity = -1
+            best_match_index = -1
+            
+            # Local Math Vector Search running
+            for idx, note in enumerate(study_notes):
+                note_vector = text_to_vector(note, vocabulary)
+                similarity = calculate_cosine_similarity(query_vector, note_vector)
+                
+                if similarity > best_similarity:
+                    best_similarity = similarity
+                    best_match_index = idx
+            
+            print(f"\n⚡ [Backend Search Hit]: Best Cosine Distance Score = {best_similarity:.4f}")
+            
+            if best_similarity > 0.05:
+                matched_note = study_notes[best_match_index]
+                print(f"📖 [Local Context Retrieved]: {matched_note}")
+                
+                # BINDING LAYER: Pure Math Engine output goes directly into Google Gemini AI
+                print("\nConnecting to Google AI pipeline for advanced synthesis...")
+                ai_response = ask_google_gemini_smart_summary(matched_note, query)
+                print(ai_response)
+            else:
+                print("❌ No relevant local study notes found matching those terms.")
+                
+        elif choice == "2":
+            print("\n===== CURRENT LOCAL STUDY LOGS =====")
+            for i, note in enumerate(study_notes, 1):
+                print(f"{i}. {note}")
+                
+        elif choice == "3":
+            print("\nShutting down AI Study Assistant Pro. Good luck with GKS and Devpost!")
+            break
+        else:
+            print("Invalid choice. Please select 1, 2, or 3.")
+
+if __name__ == "__main__":
+    main()
