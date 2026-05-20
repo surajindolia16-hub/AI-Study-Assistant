@@ -1,32 +1,29 @@
 # =======================================================
-# AI Study Assistant Pro (v2.0.0 - Google AI Edition)
+# AI STUDY ASSISTANT PRO (v3.0.0 - ULTIMATE HACKATHON EDITION)
 # Developed by: Suraj Indoliya (12th Grade Independent Research)
-# Custom Numeric Vector Search Math Engine + Google Gemini AI
+# Hybrid Architecture: Custom Cosine Vector Engine + Google Gemini AI
 # =======================================================
 
 import math
-import os
+import tkinter as tk
+from tkinter import messagebox, scrolledtext
 import google.generativeai as genai
 
 # -------------------------------------------------------
-# GOOGLE GEMINI AI CONFIGURATION
+# GOOGLE GEMINI AI INITIALIZATION
 # -------------------------------------------------------
-# Apni Google AI Studio se mili API key yahan lagayein
+# [IMPORTANT]: Replace with your real Google AI Studio API Key
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY"
 
-if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY":
-    try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        # Lightweight aur fast model ka use kar rahe hain jo mobile par smoothly chale
-        ai_model = genai.GenerativeModel('gemini-1.5-flash')
-        GEMINI_AVAILABLE = True
-    except Exception:
-        GEMINI_AVAILABLE = False
-else:
+try:
+    genai.configure(api_key=GEMINI_API_KEY)
+    ai_model = genai.GenerativeModel('gemini-1.5-flash')
+    GEMINI_AVAILABLE = True
+except Exception:
     GEMINI_AVAILABLE = False
 
 # -------------------------------------------------------
-# CORE DATA PERSISTENCE & NOTES
+# HARDCODED LOCAL STUDY DATABASE (STUDENT CONTEXT LOGS)
 # -------------------------------------------------------
 study_notes = [
     "Physics: Electric field is defined as the electric force per unit charge. The direction of the field is taken to be the direction of the force it would exert on a positive test charge.",
@@ -36,7 +33,7 @@ study_notes = [
 ]
 
 # -------------------------------------------------------
-# BACKEND MATH ENGINE: PURE NUMERIC VECTORIZER (NO LIBRARIES)
+# CORE MATHEMATICAL VECTOR ENGINE (SURAJ'S CORE LOGIC)
 # -------------------------------------------------------
 def build_vocabulary(corpus):
     vocab = set()
@@ -63,107 +60,127 @@ def calculate_cosine_similarity(vec1, vec2):
         dot_product += vec1[i] * vec2[i]
         norm_a += vec1[i] ** 2
         norm_b += vec2[i] ** 2
-    
     if norm_a == 0 or norm_b == 0:
         return 0.0
     return dot_product / (math.sqrt(norm_a) * math.sqrt(norm_b))
 
-# Global Vocabulary Build
 vocabulary = build_vocabulary(study_notes)
 
 # -------------------------------------------------------
-# GOOGLE AI INNOVATION LAYER (THE GOOGLE HACKATHON BRIDGE)
+# GOOGLE AI COGNITIVE PIPELINE
 # -------------------------------------------------------
 def ask_google_gemini_smart_summary(context_paragraph, user_query):
-    """
-    Yeh function hamare math engine ke result ko leta hai aur 
-    Google Gemini AI ko bhejkar ek super smart smart-study response generate karta hai.
-    """
-    if not GEMINI_AVAILABLE:
-        return "\n[⚠️ Google AI Info]: API Key missing or Google AI module offline. Displaying raw local vector match only."
+    if not GEMINI_AVAILABLE or GEMINI_API_KEY == "YOUR_GEMINI_API_KEY":
+        return "\n[⚠️ Google AI System Notification]: Running in Standalone Offline Verification Mode. (Add Gemini API Key to enable cloud insights)."
     
     prompt = f"""
-    You are an AI Study Assistant Pro built by Suraj Indoliya for the Google AI Hackathon.
-    
-    Context from student's notes:
+    You are a backend component inside 'AI Study Assistant Pro' built by Suraj Indoliya.
+    The local math engine has successfully filtered this context paragraph:
     "{context_paragraph}"
     
-    Student's Question:
+    The student asked this specific question:
     "{user_query}"
     
-    Instructions:
-    Based ONLY on the provided context, answer the student's question in a crisp, clear, and engaging educational format. 
-    Add a tiny 'Smart Quiz Question' at the end to help the student test their knowledge. Keep it concise.
+    Your Job: Summarize the answer beautifully and add 1 short multiple-choice quiz question at the end based ONLY on the context. Keep it highly educational and extremely concise.
     """
     try:
         response = ai_model.generate_content(prompt)
-        return f"\n🤖 [Google Gemini AI Smart Insights]:\n{response.text}"
+        return response.text
     except Exception as e:
-        return f"\n[-] Failed to connect to Google AI Services: {str(e)}"
+        return f"Error linking with Google AI Framework: {str(e)}"
 
 # -------------------------------------------------------
-# MAIN CORE EXECUTION ENGINE
+# GRAPHICAL USER INTERFACE (GUI) - HIGH PROBABILITY LAYER
 # -------------------------------------------------------
-def main():
-    print("=========================================================")
-    print("   AI STUDY ASSISTANT PRO (v2.0.0 - GOOGLE AI EDITION)   ")
-    print("=========================================================")
-    print(f"[+] Status: Local Core Vector Engine Loaded. Vocab Size: {len(vocabulary)} words.")
-    if GEMINI_AVAILABLE:
-        print("[+] Status: Google Vertex/Gemini AI Gateway Online Integration Ready!")
-    else:
-        print("[!] Status: Google AI running in Standalone Local Verification Mode (No API Key).")
-    
-    while True:
-        print("\n---------------------------------------------------------")
-        print("1. Search Notes (Pure Math Engine + Google AI Analysis)")
-        print("2. View All Local Study Context Logs")
-        print("3. Exit System")
-        choice = input("Select Operation (1-3): ").strip()
+class StudyAssistantGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("AI Study Assistant Pro v3.0.0 (Google AI Edition)")
+        self.root.geometry("650x600")
+        self.root.configure(bg="#1e1e2e")  # Beautiful Dark Theme
         
-        if choice == "1":
-            query = input("\nEnter your study question/keywords: ").strip()
-            if not query:
-                print("Query cannot be empty!")
-                continue
-                
-            query_vector = text_to_vector(query, vocabulary)
-            
-            best_similarity = -1
-            best_match_index = -1
-            
-            # Local Math Vector Search running
-            for idx, note in enumerate(study_notes):
-                note_vector = text_to_vector(note, vocabulary)
-                similarity = calculate_cosine_similarity(query_vector, note_vector)
-                
-                if similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match_index = idx
-            
-            print(f"\n⚡ [Backend Search Hit]: Best Cosine Distance Score = {best_similarity:.4f}")
-            
-            if best_similarity > 0.05:
-                matched_note = study_notes[best_match_index]
-                print(f"📖 [Local Context Retrieved]: {matched_note}")
-                
-                # BINDING LAYER: Pure Math Engine output goes directly into Google Gemini AI
-                print("\nConnecting to Google AI pipeline for advanced synthesis...")
-                ai_response = ask_google_gemini_smart_summary(matched_note, query)
-                print(ai_response)
-            else:
-                print("❌ No relevant local study notes found matching those terms.")
-                
-        elif choice == "2":
-            print("\n===== CURRENT LOCAL STUDY LOGS =====")
-            for i, note in enumerate(study_notes, 1):
-                print(f"{i}. {note}")
-                
-        elif choice == "3":
-            print("\nShutting down AI Study Assistant Pro. Good luck with GKS and Devpost!")
-            break
-        else:
-            print("Invalid choice. Please select 1, 2, or 3.")
+        # Title Header
+        title_label = tk.Label(root, text="AI STUDY ASSISTANT PRO", font=("Arial", 18, "bold"), fg="#cdd6f4", bg="#1e1e2e")
+        title_label.pack(pady=10)
+        
+        subtitle_label = tk.Label(root, text="Developed by Suraj Indoliya | 2D Vector Math + Google AI Pipeline", font=("Arial", 9, "italic"), fg="#a6adc8", bg="#1e1e2e")
+        subtitle_label.pack()
 
+        # Status Bar
+        status_text = "🟢 Google AI Connected" if GEMINI_AVAILABLE and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY" else "⚠️ Standalone Local Vector Engine Mode"
+        status_color = "#a6e3a1" if GEMINI_AVAILABLE and GEMINI_API_KEY != "YOUR_GEMINI_API_KEY" else "#f9e2af"
+        status_label = tk.Label(root, text=status_text, font=("Arial", 10, "bold"), fg=status_color, bg="#313244", width=70, height=2)
+        status_label.pack(pady=10)
+
+        # Input Box
+        input_frame = tk.Frame(root, bg="#1e1e2e")
+        input_frame.pack(pady=10)
+        
+        tk.Label(input_frame, text="Enter Study Question / Topic:", font=("Arial", 11, "bold"), fg="#cdd6f4", bg="#1e1e2e").pack(anchor="w")
+        self.query_entry = tk.Entry(input_frame, font=("Arial", 12), width=50, bg="#313244", fg="#cdd6f4", insertbackground="white")
+        self.query_entry.pack(pady=5)
+        
+        # Action Button
+        search_btn = tk.Button(root, text="⚡ Run Smart Search Engine", font=("Arial", 11, "bold"), bg="#89b4fa", fg="#11111b", activebackground="#b4befe", command=self.process_search)
+        search_btn.pack(pady=5)
+
+        # Output Log Box
+        output_frame = tk.Frame(root, bg="#1e1e2e")
+        output_frame.pack(pady=10, fill="both", expand=True)
+        
+        tk.Label(output_frame, text="System Response Console Logs:", font=("Arial", 11, "bold"), fg="#cdd6f4", bg="#1e1e2e").pack(anchor="w", padx=25)
+        self.console_output = scrolledtext.ScrolledText(output_frame, font=("Courier New", 10), width=75, height=20, bg="#181825", fg="#a6e3a1", insertbackground="white")
+        self.console_output.pack(pady=5, padx=25)
+        
+        # Initial Boot Log Message
+        self.log_to_console(f"[SYSTEM BOOT] Standalone Vector Engine Loaded Successfully.\n[SYSTEM BOOT] Local Vocabulary Size: {len(vocabulary)} structural tokens indexed.\n[INFO] Project compiled for Google AI Hackathon Verification standards.")
+
+    def log_to_console(self, text):
+        self.console_output.insert(tk.END, text + "\n")
+        self.console_output.see(tk.END)
+
+    def process_search(self):
+        query = self.query_entry.get().strip()
+        if not query:
+            messagebox.showwarning("Input Error", "Please enter a question to query the database!")
+            return
+            
+        self.console_output.delete("1.0", tk.END) # Clear previous log
+        self.log_to_console(f"🔍 [Query Captured]: '{query}'")
+        
+        # 1. Math Pipeline Engine Starts
+        query_vector = text_to_vector(query, vocabulary)
+        best_similarity = -1
+        best_match_index = -1
+        
+        for idx, note in enumerate(study_notes):
+            note_vector = text_to_vector(note, vocabulary)
+            similarity = calculate_cosine_similarity(query_vector, note_vector)
+            if similarity > best_similarity:
+                best_similarity = similarity
+                best_match_index = idx
+                
+        self.log_to_console(f"📊 [Suraj's Math Engine]: Calculated Best Cosine Match Distance = {best_similarity:.4f}")
+        
+        if best_similarity > 0.05:
+            matched_note = study_notes[best_match_index]
+            self.log_to_console(f"📖 [Local Context Matrix Hit]: {matched_note}\n")
+            
+            # 2. Feeding to Google AI Framework
+            self.log_to_console("🚀 Executing Google Gemini AI Cloud Bridge Sequence...")
+            self.root.update() # Refresh UI
+            
+            ai_response = ask_google_gemini_smart_summary(matched_note, query)
+            
+            self.log_to_console("\n=======================================================")
+            self.log_to_console("🤖 [GOOGLE GEMINI GENERATIVE SYNTHESIS]:")
+            self.log_to_console(ai_response)
+            self.log_to_console("=======================================================")
+        else:
+            self.log_to_console("❌ [Search Fault]: Cosine distance below threshold. No matching context found in local core layers.")
+
+# Main Boot Sequence
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = StudyAssistantGUI(root)
+    root.mainloop()
